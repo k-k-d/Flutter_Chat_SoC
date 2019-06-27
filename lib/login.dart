@@ -3,14 +3,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'home.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'home.dart';
 
 class LoginScreen extends StatefulWidget
 {
   @override
   State<StatefulWidget> createState() {
-    return new LoginScreenState();
+    return LoginScreenState();
   }
 }
     
@@ -18,9 +19,10 @@ class LoginScreenState extends State<LoginScreen>{
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   SharedPreferences _preferences;
-  FirebaseUser _currentuser;
-  bool _isLoggedIn;
-
+  FirebaseUser _currentUser;
+  bool _isLoggedIn = false;
+  bool _isWaiting = false;
+  
   @override
   void initState()  {
     super.initState();
@@ -28,13 +30,20 @@ class LoginScreenState extends State<LoginScreen>{
   }
 
   void _initialise() async  {
+    this.setState(()  {
+      _isWaiting = true;
+    });
     _preferences = await SharedPreferences.getInstance();
     _isLoggedIn = await _googleSignIn.isSignedIn();
-    // if(_isLoggedIn) {
-    //   Navigator.push(
-    //     context,
-    //     MaterialPageRoute(builder: (context) => HomeScreen()));
-    // }
+    if(_isLoggedIn) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: _preferences.getString('id')))
+      );
+    }
+    this.setState(()  {
+      _isWaiting = false;
+    });
   }
 
   @override
@@ -80,6 +89,18 @@ class LoginScreenState extends State<LoginScreen>{
                 ),
               ] 
             ),
+          ),
+          Positioned(
+            child: _isWaiting
+            ? Container(
+              child: Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                ),
+              ),
+              color: Colors.white.withOpacity(0.5),
+            )
+            : Container()
           )
         ]
       )
@@ -87,6 +108,9 @@ class LoginScreenState extends State<LoginScreen>{
   }
 
   Future<FirebaseUser> _gSignin() async {
+    this.setState(()  {
+      _isWaiting = true;
+    });
     GoogleSignInAccount googleSignInAccount = await _googleSignIn.signIn();
     GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
     AuthCredential authCredential = GoogleAuthProvider.getCredential(
@@ -100,7 +124,32 @@ class LoginScreenState extends State<LoginScreen>{
       final List<DocumentSnapshot> documents = result.documents;
       if(documents.length == 0) {
         Firestore.instance.collection('users').document(firebaseUser.uid).setData({'displayName': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid});
+        _currentUser = firebaseUser;
+        await _preferences.setString('id', _currentUser.uid);
+        await _preferences.setString('displayName', _currentUser.displayName);
+        await _preferences.setString('photoUrl', _currentUser.photoUrl);
       }
+      else {
+        await _preferences.setString('id', documents[0]['id']);
+        await _preferences.setString('photoUrl', documents[0]['photoUrl']);
+        await _preferences.setString('displayName', documents[0]['displayName']);
+        await _preferences.setString('about', documents[0]['about']);
+        debugPrint("Already on DB ${documents[0]['about']}");
+      }
+      Fluttertoast.showToast(msg: "Signed in as ${_preferences.getString('displayName')}");
+      this.setState(()  {
+        _isWaiting = false;
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: _preferences.getString('id')))
+      );
+    }
+    else  {
+      Fluttertoast.showToast(msg: "Sign in Failed");
+      this.setState(()  {
+        _isWaiting = false;
+      });    
     }
     return firebaseUser;
   }
