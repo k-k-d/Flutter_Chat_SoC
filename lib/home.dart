@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'chat.dart';
 
 class HomeScreen extends StatefulWidget {
   final String _currentUserId;
@@ -49,7 +50,13 @@ class HomeScreenState extends State<HomeScreen> {
                       if(doc['id'] != _currentUserId) {
                         return ListTile(
                           title: Text(doc['displayName']),
-                          onTap: () {debugPrint("Tapped");},
+                          onTap: () {
+                            debugPrint("Tapped");
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => ChatScreen(peerId: doc['id'], peerName: doc['displayName'], peerImg: doc['photoUrl']))
+                            );
+                          },
                           leading: CircleAvatar(
                             backgroundImage: NetworkImage(doc['photoUrl']),
                           ),
