@@ -26,13 +26,27 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context)  {
     return Scaffold(
+      backgroundColor: Colors.white24,
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent,
+        iconTheme: IconThemeData(color: Colors.lightBlue),
+        actions: <Widget>[
+          IconButton(
+            color: Colors.lightBlue,
+            icon: Icon(Icons.group_add),
+            onPressed: () {debugPrint("Create Group");},            //  Add Group Creation here
+          ),
+          IconButton(
+            icon: Icon(Icons.settings),
+            color: Colors.lightBlue,
+            onPressed: () {debugPrint("User Settings");},            //  Add User Options here
+          )
+        ],
+        backgroundColor: Colors.black87,
         centerTitle: true,
         title: Text(
           'Home',
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.lightBlue,
           )
         ),
       ),
@@ -48,24 +62,31 @@ class HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, i) {
                       DocumentSnapshot doc = snapshot.data.documents[i];
                       if(doc['id'] != _currentUserId) {
-                        return ListTile(
-                          title: Text(doc['displayName']),
-                          onTap: () {
-                            debugPrint("Tapped");
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => ChatScreen(peerId: doc['id'], peerName: doc['displayName'], peerImg: doc['photoUrl']))
-                            );
-                          },
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(doc['photoUrl']),
-                          ),
-                          subtitle: Text(
-                            doc['about']??'NA',
-                            style: TextStyle(
-                              color: Colors.black
-                            )
-                          ),
+                        return Ink(
+                          color: Colors.black87,
+                            child: ListTile(
+                            title: Text(
+                              doc['displayName'],
+                              style: TextStyle(
+                                color: Colors.lightBlue),
+                            ),
+                            onTap: () {
+                              debugPrint("Tapped");
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => ChatScreen(peerId: doc['id'], peerName: doc['displayName'], peerImg: doc['photoUrl']))
+                              );
+                            },
+                            leading: CircleAvatar(
+                              backgroundImage: NetworkImage(doc['photoUrl']),
+                            ),
+                            subtitle: Text(
+                              doc['about']??'NA',
+                              style: TextStyle(
+                                color: Colors.lightBlue
+                              )
+                            ),
+                          )
                         );
                       }
                       else  {
@@ -73,7 +94,7 @@ class HomeScreenState extends State<HomeScreen> {
                       }
                     },
                     padding: EdgeInsets.all(8.0),
-                    separatorBuilder: (context, i) => Divider(),
+                    separatorBuilder: (context, i) => Divider(color: Colors.lightBlue,),
                   );
                 }
                 else  {
@@ -81,7 +102,15 @@ class HomeScreenState extends State<HomeScreen> {
                 }
               },
             ),
-          )
+          ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.end,
+          //   children: <Widget>[FloatingActionButton(
+          //     onPressed: null,
+          //     backgroundColor: Colors.lightBlue,
+          //     child: Icon(Icons.group_add),
+          //   )]
+          // )
         ],
       ),
     );

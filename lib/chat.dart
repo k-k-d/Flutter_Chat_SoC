@@ -77,12 +77,13 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context)  {
     return Scaffold(
+      backgroundColor: Colors.white24,
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent,
+        backgroundColor: Colors.black87,
         title: Text(
           _peerName,
           style: TextStyle(
-            color: Colors.white,
+            color: Colors.lightBlue,
             fontSize: 16.0,
           ),
         ),
@@ -100,11 +101,10 @@ class ChatScreenState extends State<ChatScreen> {
               stream: Firestore.instance.collection('2pChats').document(_chatId).collection(_chatId).orderBy('timeStamp', descending: true).limit(20).snapshots(),
               builder: (context, snapshot)  {
                 if(snapshot.hasData)  {
-                  return ListView.separated(
+                  return ListView.builder(
                     reverse: true,
                     itemCount: snapshot.data.documents.length,
                     padding: EdgeInsets.all(8.0),
-                    separatorBuilder: (context, i) => Divider(),
                     itemBuilder: (context, i) {
                       DocumentSnapshot doc = snapshot.data.documents[i];
                       return Row(
@@ -114,14 +114,14 @@ class ChatScreenState extends State<ChatScreen> {
                             child: Text(
                               doc['msg'],
                               style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.lightBlueAccent,
                               ),
                             ),
                             padding: EdgeInsets.all(10.0),
                             width: 250,
                             margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
                             decoration: BoxDecoration(
-                              color: Colors.blueGrey,
+                              color: Colors.black87,
                               borderRadius: BorderRadius.circular(5.0),
                             ),
                           ),
@@ -140,7 +140,7 @@ class ChatScreenState extends State<ChatScreen> {
             decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
-                  color: Colors.grey
+                  color: Colors.black87
                 )
               )
             ),
@@ -148,13 +148,17 @@ class ChatScreenState extends State<ChatScreen> {
               children: <Widget>[
                 Flexible(
                   child: TextField(
+                    style: TextStyle(
+                      color: Colors.lightBlue,
+                    ),
                     controller: _textEditingController,
                     decoration: InputDecoration.collapsed(
+                      fillColor: Colors.black87,
                       hintText: 'Type a message',
                       hintStyle: TextStyle(
                         fontStyle: FontStyle.italic,
                         fontWeight: FontWeight.w100,
-                        color: Colors.black87
+                        color: Colors.blueGrey
                       ),
                     ),
                   ),
@@ -164,8 +168,11 @@ class ChatScreenState extends State<ChatScreen> {
                     debugPrint('Pressed');
                     send();
                   },
-                  backgroundColor: Colors.blueAccent,
-                  child: Icon(Icons.send),
+                  backgroundColor: Colors.lightBlue,
+                  child: Icon(
+                    Icons.send,
+                    color: Colors.black87,
+                  ),
                 )
               ],
               // mainAxisAlignment: MainAxisAlignment.end,

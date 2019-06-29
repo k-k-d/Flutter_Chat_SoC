@@ -49,13 +49,14 @@ class LoginScreenState extends State<LoginScreen>{
   @override
   Widget build(BuildContext context)  {
     return Scaffold(
+      backgroundColor: Colors.white24,
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent,
+        backgroundColor: Colors.lightBlue,
         centerTitle: true,
         title: Text(
           "Login Screen",
           style: TextStyle(
-            color: Colors.white
+            color: Colors.black87
           ),
         ),
       ),
@@ -70,10 +71,10 @@ class LoginScreenState extends State<LoginScreen>{
                   child: Text(
                     "Sign in with Google",
                     style: TextStyle(
-                    color: Colors.white
+                    color: Colors.black87
                     ),
                   ),
-                  color: Colors.blueAccent,
+                  color: Colors.lightBlue,
                   padding: EdgeInsets.all(10.0),
                 ),
                 RaisedButton(
@@ -81,10 +82,10 @@ class LoginScreenState extends State<LoginScreen>{
                   child: Text(
                     "Sign out of Google",
                     style: TextStyle(
-                    color: Colors.white
+                    color: Colors.black87
                     ),
                   ),
-                  color: Colors.blueAccent,
+                  color: Colors.lightBlue,
                   padding: EdgeInsets.all(10.0),
                 ),
               ] 
@@ -95,10 +96,10 @@ class LoginScreenState extends State<LoginScreen>{
             ? Container(
               child: Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.lightBlue),
                 ),
               ),
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.black.withOpacity(0.5),
             )
             : Container()
           )
