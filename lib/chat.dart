@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatScreen extends StatefulWidget {
   final String _peerId;
   final String _peerName;
   final String _peerImg;
+  final String _type;
 
   ChatScreen  ({
-    Key key, @required String peerId, @required String peerName, @required String peerImg
-  }): _peerId = peerId, _peerName = peerName, _peerImg = peerImg, super(key: key);
+    Key key, @required String peerId, @required String peerName, String peerImg, @required String type
+  }): _peerId = peerId, _peerName = peerName, _peerImg = peerImg, _type = type,super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return ChatScreenState(peerId: _peerId, peerName: _peerName, peerImg: _peerImg);
+    return ChatScreenState(peerId: _peerId, peerName: _peerName, peerImg: _peerImg, type: _type);
   }
 }
 
@@ -22,14 +24,15 @@ class ChatScreenState extends State<ChatScreen> {
   final String _peerId;
   final String _peerName;
   final String _peerImg;
+  final String _type;
   SharedPreferences _preferences;
   String _chatId;
   String _id;
   TextEditingController _textEditingController = new TextEditingController();
 
   ChatScreenState ({
-    Key key, @required String peerId, @required String peerName, @required String peerImg
-  }): _peerId = peerId, _peerName = peerName, _peerImg = peerImg;
+    Key key, @required String peerId, @required String peerName, String peerImg, @required String type
+  }): _peerId = peerId, _peerName = peerName, _peerImg = peerImg, _type = type;
 
   @override
   void initState()  {
@@ -41,21 +44,21 @@ class ChatScreenState extends State<ChatScreen> {
   void _initialise() async {
     _preferences = await SharedPreferences.getInstance();
     _id = _preferences.getString('id');
-    if(_id.compareTo(_peerId) < 0)  {
-      _chatId = '$_id-$_peerId';
+    switch(_type)
+    {
+      case '2pChats':
+        if(_id.compareTo(_peerId) < 0)  {
+          _chatId = '$_id-$_peerId';
+        }
+        else  {
+          _chatId = '$_peerId-$_id';
+        }
+        debugPrint(_chatId);
+        break;
+      case 'groupChats':
+        _chatId = _peerId;
     }
-    else  {
-      _chatId = '$_peerId-$_id';
-    }
-    debugPrint(_chatId);
-    setState(() {
-      if(_id.compareTo(_peerId) < 0)  {
-        _chatId = '$_id-$_peerId';
-      }
-      else  {
-        _chatId = '$_peerId-$_id';
-      }
-    });
+    setState(() {});
   }
   
   void send() {
@@ -63,7 +66,7 @@ class ChatScreenState extends State<ChatScreen> {
     final String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
     Firestore.instance.runTransaction((transaction) async{
       await transaction.set(
-        Firestore.instance.collection('2pChats').document(_chatId).collection(_chatId).document(timeStamp),
+        Firestore.instance.collection(_type).document(_chatId).collection('messages').document(timeStamp),
         {
           'from': _id,
           'to': _peerId,
@@ -88,9 +91,9 @@ class ChatScreenState extends State<ChatScreen> {
           ),
         ),
         centerTitle: true,
-        leading: CircleAvatar(
+        leading: _peerImg != null? CircleAvatar(
           backgroundImage: NetworkImage(_peerImg),
-        ),
+        ): Container(),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -98,7 +101,7 @@ class ChatScreenState extends State<ChatScreen> {
         children: <Widget>[
           Flexible(
             child: StreamBuilder(
-              stream: Firestore.instance.collection('2pChats').document(_chatId).collection(_chatId).orderBy('timeStamp', descending: true).limit(20).snapshots(),
+              stream: Firestore.instance.collection(_type).document(_chatId).collection('messages').orderBy('timeStamp', descending: true).limit(20).snapshots(),
               builder: (context, snapshot)  {
                 if(snapshot.hasData)  {
                   return ListView.builder(
@@ -110,21 +113,24 @@ class ChatScreenState extends State<ChatScreen> {
                       return Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
-                          Container(
-                            child: Text(
-                              doc['msg'],
-                              style: TextStyle(
-                                color: Colors.lightBlueAccent,
+                          Card(
+                            color: Colors.black87,
+                            child: Container(
+                              child: Text(
+                                doc['msg'],
+                                style: TextStyle(
+                                  color: Colors.lightBlueAccent,
+                                ),
+                              ),
+                              padding: EdgeInsets.all(10.0),
+                              width: 250,
+                              margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                              decoration: BoxDecoration(
+                                color: Colors.black87,
+                                borderRadius: BorderRadius.circular(5.0),
                               ),
                             ),
-                            padding: EdgeInsets.all(10.0),
-                            width: 250,
-                            margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                            decoration: BoxDecoration(
-                              color: Colors.black87,
-                              borderRadius: BorderRadius.circular(5.0),
-                            ),
-                          ),
+                          )
                         ],
                       );
                     },
@@ -153,7 +159,6 @@ class ChatScreenState extends State<ChatScreen> {
                     ),
                     controller: _textEditingController,
                     decoration: InputDecoration.collapsed(
-                      fillColor: Colors.black87,
                       hintText: 'Type a message',
                       hintStyle: TextStyle(
                         fontStyle: FontStyle.italic,

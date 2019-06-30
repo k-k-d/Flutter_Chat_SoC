@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'chat.dart';
+import 'create.dart';
 
 class HomeScreen extends StatefulWidget {
   final String _currentUserId;
@@ -18,10 +19,22 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   final String _currentUserId;
+  int _groups;
   
   HomeScreenState({
     Key key, @required String currentUserId
   }): _currentUserId = currentUserId;
+  
+  @override
+  void initState() {
+    super.initState();
+    initialise();
+  }
+
+  initialise() async  {
+    DocumentSnapshot doc = await Firestore.instance.collection('users').document(_currentUserId).get();
+    _groups = doc['groups'].length;
+  }
   
   @override
   Widget build(BuildContext context)  {
@@ -33,7 +46,13 @@ class HomeScreenState extends State<HomeScreen> {
           IconButton(
             color: Colors.lightBlue,
             icon: Icon(Icons.group_add),
-            onPressed: () {debugPrint("Create Group");},            //  Add Group Creation here
+            onPressed: () {
+              debugPrint("Create Group");
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CreateGroup())
+              );  
+            },            //  Add Group Creation here
           ),
           IconButton(
             icon: Icon(Icons.settings),
@@ -54,17 +73,59 @@ class HomeScreenState extends State<HomeScreen> {
         children: <Widget>[
           Container(
             child: StreamBuilder(
+              stream: Firestore.instance.collection('groupChats').snapshots(),
+              builder: (context, snapshot)  {
+                if(snapshot.hasData)  {
+                  return ListView.builder(
+                    itemCount: _groups,
+                    itemBuilder: (context, i) {
+                      DocumentSnapshot doc = snapshot.data.documents[i];
+                      if(doc['members'].contains(_currentUserId)) {
+                        return Card(
+                          color: Colors.black87,
+                          child: ListTile(
+                            title: Text(
+                              doc['groupName'],
+                              style: TextStyle(
+                                color: Colors.lightBlue
+                              ),
+                            ),
+                            onTap: () {
+                              debugPrint("Tapped");
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => ChatScreen(peerId: doc['groupId'].toString(), peerName: doc['groupName'], type: 'groupChats'))
+                              );
+                            },
+                          ),
+                        );
+                      }
+                      else  {
+                        return Container();
+                      }
+                    },
+                  );
+                }
+                else  {
+                  return Container();
+                }
+              },
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.all(30.0),
+            child: StreamBuilder(
               stream: Firestore.instance.collection('users').snapshots(),
               builder: (context, snapshot)  {
                 if(snapshot.hasData){
-                  return ListView.separated(
+                  return ListView.builder(
                     itemCount: snapshot.data.documents.length,
                     itemBuilder: (context, i) {
                       DocumentSnapshot doc = snapshot.data.documents[i];
                       if(doc['id'] != _currentUserId) {
-                        return Ink(
+                        return Card(
                           color: Colors.black87,
-                            child: ListTile(
+                          child: ListTile(
                             title: Text(
                               doc['displayName'],
                               style: TextStyle(
@@ -74,7 +135,7 @@ class HomeScreenState extends State<HomeScreen> {
                               debugPrint("Tapped");
                               Navigator.push(
                                 context,
-                                MaterialPageRoute(builder: (context) => ChatScreen(peerId: doc['id'], peerName: doc['displayName'], peerImg: doc['photoUrl']))
+                                MaterialPageRoute(builder: (context) => ChatScreen(peerId: doc['id'], peerName: doc['displayName'], peerImg: doc['photoUrl'], type: '2pChats'))
                               );
                             },
                             leading: CircleAvatar(
@@ -94,7 +155,6 @@ class HomeScreenState extends State<HomeScreen> {
                       }
                     },
                     padding: EdgeInsets.all(8.0),
-                    separatorBuilder: (context, i) => Divider(color: Colors.lightBlue,),
                   );
                 }
                 else  {
