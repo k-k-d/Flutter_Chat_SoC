@@ -49,7 +49,7 @@ class LoginScreenState extends State<LoginScreen>{
   @override
   Widget build(BuildContext context)  {
     return Scaffold(
-      backgroundColor: Colors.white24,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.lightBlue,
         centerTitle: true,
@@ -66,27 +66,38 @@ class LoginScreenState extends State<LoginScreen>{
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                RaisedButton(
-                  onPressed: _gSignin,
-                  child: Text(
-                    "Sign in with Google",
-                    style: TextStyle(
-                    color: Colors.black87
+                ButtonTheme(
+                  minWidth: 200.0,
+                  height: 50.0,
+                  child: RaisedButton(
+                    onPressed: _gSignin,
+                    child: Text(
+                      "Sign in with Google",
+                      style: TextStyle(
+                      color: Colors.white
+                      ),
                     ),
+                    color: Colors.red,
+                    padding: EdgeInsets.all(10.0),
                   ),
-                  color: Colors.lightBlue,
-                  padding: EdgeInsets.all(10.0),
                 ),
-                RaisedButton(
-                  onPressed: _gSignout,
-                  child: Text(
-                    "Sign out of Google",
-                    style: TextStyle(
-                    color: Colors.black87
+                Container(
+                  margin: EdgeInsets.only(top: 10.0),
+                  child: ButtonTheme(
+                    minWidth: 200.0,
+                    height: 50.0,
+                    child: RaisedButton(
+                      onPressed: _gSignout,
+                      child: Text(
+                        "Sign out of Google",
+                        style: TextStyle(
+                          color: Colors.black87
+                        ),
+                      ),
+                      color: Colors.red,
+                      padding: EdgeInsets.all(10.0),
                     ),
                   ),
-                  color: Colors.lightBlue,
-                  padding: EdgeInsets.all(10.0),
                 ),
               ] 
             ),
@@ -99,7 +110,7 @@ class LoginScreenState extends State<LoginScreen>{
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.lightBlue),
                 ),
               ),
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.white,
             )
             : Container()
           )
@@ -141,7 +152,7 @@ class LoginScreenState extends State<LoginScreen>{
       this.setState(()  {
         _isWaiting = false;
       });
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: _preferences.getString('id')))
       );

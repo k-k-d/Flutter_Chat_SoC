@@ -64,29 +64,32 @@ class ChatScreenState extends State<ChatScreen> {
   void send() {
     final String msg = _textEditingController.text;
     final String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
-    Firestore.instance.runTransaction((transaction) async{
-      await transaction.set(
-        Firestore.instance.collection(_type).document(_chatId).collection('messages').document(timeStamp),
-        {
-          'from': _id,
-          'to': _peerId,
-          'msg': msg,
-          'timeStamp': timeStamp
-        }
-      );
-    });
+    if(msg.isNotEmpty){
+      Firestore.instance.runTransaction((transaction) async{
+        await transaction.set(
+          Firestore.instance.collection(_type).document(_chatId).collection('messages').document(timeStamp),
+          {
+            'from': _id,
+            'to': _peerId,
+            'msg': msg,
+            'timeStamp': timeStamp
+          }
+        );
+      });
+    }
+    _textEditingController.clear();
   }
 
   @override
   Widget build(BuildContext context)  {
     return Scaffold(
-      backgroundColor: Colors.white24,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.black87,
+        backgroundColor: Colors.lightBlue,
         title: Text(
           _peerName,
           style: TextStyle(
-            color: Colors.lightBlue,
+            color: Colors.black87,
             fontSize: 16.0,
           ),
         ),
@@ -114,20 +117,20 @@ class ChatScreenState extends State<ChatScreen> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
                           Card(
-                            color: Colors.black87,
+                            color: Colors.lightBlueAccent,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.0),),),
                             child: Container(
                               child: Text(
                                 doc['msg'],
                                 style: TextStyle(
-                                  color: Colors.lightBlueAccent,
+                                  color: Colors.black87,
                                 ),
                               ),
                               padding: EdgeInsets.all(10.0),
                               width: 250,
                               margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
                               decoration: BoxDecoration(
-                                color: Colors.black87,
-                                borderRadius: BorderRadius.circular(5.0),
+                                color: Colors.lightBlueAccent,
                               ),
                             ),
                           )
@@ -155,14 +158,14 @@ class ChatScreenState extends State<ChatScreen> {
                 Flexible(
                   child: TextField(
                     style: TextStyle(
-                      color: Colors.lightBlue,
+                      color: Colors.black87,
                     ),
                     controller: _textEditingController,
                     decoration: InputDecoration.collapsed(
                       hintText: 'Type a message',
                       hintStyle: TextStyle(
                         fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.w100,
+                        fontWeight: FontWeight.w400,
                         color: Colors.blueGrey
                       ),
                     ),
@@ -172,7 +175,7 @@ class ChatScreenState extends State<ChatScreen> {
                   onPressed: () {
                     debugPrint('Pressed');
                     send();
-                  },
+                  },                 
                   backgroundColor: Colors.lightBlue,
                   child: Icon(
                     Icons.send,

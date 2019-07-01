@@ -27,12 +27,12 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context)  {
     return Scaffold(
-      backgroundColor: Colors.white24,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.lightBlue),
+        iconTheme: IconThemeData(color: Colors.white),
         actions: <Widget>[
           IconButton(
-            color: Colors.lightBlue,
+            color: Colors.white,
             icon: Icon(Icons.group_add),
             onPressed: () {
               debugPrint("Create Group");
@@ -44,19 +44,36 @@ class HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             icon: Icon(Icons.settings),
-            color: Colors.lightBlue,
+            color: Colors.white,
             onPressed: () {debugPrint("User Settings");},            //  Add User Options here
           )
         ],
-        backgroundColor: Colors.black87,
-        centerTitle: true,
+        backgroundColor: Colors.lightBlue,
+        // centerTitle: true,
         title: Text(
-          'Home',
+          'Wingmate',
           style: TextStyle(
-            color: Colors.lightBlue,
+            color: Colors.white,
           )
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => debugPrint("All Contacts"),
+        tooltip: 'All Contacts',
+        child: Icon(Icons.message),
+        backgroundColor: Colors.blue,
+      ),
+      bottomNavigationBar: new BottomNavigationBar(
+          backgroundColor: Colors.lightBlueAccent,
+          elevation: 10.0,
+          items: [
+            new BottomNavigationBarItem(icon: new Icon(Icons.chat_bubble), title: new Text("Chats",)),
+            new BottomNavigationBarItem(icon: new Icon(Icons.event), title: new Text("Events")),
+            new BottomNavigationBarItem(icon: new Icon(Icons.music_note), title: new Text("Group Play")),
+          ], onTap: (int i){
+            if(i==1) Navigator.pushReplacementNamed(context, '/events_sl');
+            else if(i==2) Navigator.pushReplacementNamed(context, '/group_play_sl');
+          },),
       body: Stack(
         children: <Widget>[
           Container(
@@ -72,12 +89,13 @@ class HomeScreenState extends State<HomeScreen> {
                       debugPrint(doc.data.toString());
                       if(doc['members'].contains(_currentUserId)) {
                         return Card(
-                          color: Colors.black87,
+                          color: Colors.lightBlue,
                           child: ListTile(
                             title: Text(
                               doc['groupName'],
                               style: TextStyle(
-                                color: Colors.lightBlue
+                                color: Colors.black87
+                                // fontWeight: FontWeight.w600
                               ),
                             ),
                             onTap: () {
@@ -114,12 +132,12 @@ class HomeScreenState extends State<HomeScreen> {
                       DocumentSnapshot doc = snapshot.data.documents[i];
                       if(doc['id'] != _currentUserId) {
                         return Card(
-                          color: Colors.black87,
+                          color: Colors.lightBlue,
                           child: ListTile(
                             title: Text(
                               doc['displayName'],
                               style: TextStyle(
-                                color: Colors.lightBlue
+                                color: Colors.black87
                               ),
                             ),
                             onTap: () {
@@ -135,7 +153,7 @@ class HomeScreenState extends State<HomeScreen> {
                             subtitle: Text(
                               doc['about']??'NA',
                               style: TextStyle(
-                                color: Colors.lightBlue
+                                color: Colors.black87
                               )
                             ),
                           )
