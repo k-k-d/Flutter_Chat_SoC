@@ -19,22 +19,10 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   final String _currentUserId;
-  int _groups;
   
   HomeScreenState({
     Key key, @required String currentUserId
   }): _currentUserId = currentUserId;
-  
-  @override
-  void initState() {
-    super.initState();
-    initialise();
-  }
-
-  initialise() async  {
-    DocumentSnapshot doc = await Firestore.instance.collection('users').document(_currentUserId).get();
-    _groups = doc['groups'].length;
-  }
   
   @override
   Widget build(BuildContext context)  {
@@ -77,9 +65,11 @@ class HomeScreenState extends State<HomeScreen> {
               builder: (context, snapshot)  {
                 if(snapshot.hasData)  {
                   return ListView.builder(
-                    itemCount: _groups,
+                    padding: EdgeInsets.all(8.0),
+                    itemCount: snapshot.data.documents.length,
                     itemBuilder: (context, i) {
                       DocumentSnapshot doc = snapshot.data.documents[i];
+                      debugPrint(doc.data.toString());
                       if(doc['members'].contains(_currentUserId)) {
                         return Card(
                           color: Colors.black87,
@@ -113,7 +103,7 @@ class HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Container(
-            margin: EdgeInsets.all(30.0),
+            margin: EdgeInsets.only(top: 100.0),
             child: StreamBuilder(
               stream: Firestore.instance.collection('users').snapshots(),
               builder: (context, snapshot)  {
@@ -129,7 +119,8 @@ class HomeScreenState extends State<HomeScreen> {
                             title: Text(
                               doc['displayName'],
                               style: TextStyle(
-                                color: Colors.lightBlue),
+                                color: Colors.lightBlue
+                              ),
                             ),
                             onTap: () {
                               debugPrint("Tapped");
