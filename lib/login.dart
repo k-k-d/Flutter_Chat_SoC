@@ -36,9 +36,9 @@ class LoginScreenState extends State<LoginScreen>{
     _preferences = await SharedPreferences.getInstance();
     _isLoggedIn = await _googleSignIn.isSignedIn();
     if(_isLoggedIn) {
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: _preferences.getString('id')))
+        MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: _preferences.getString('id'), googleSignIn: _googleSignIn))
       );
     }
     this.setState(()  {
@@ -49,11 +49,12 @@ class LoginScreenState extends State<LoginScreen>{
   @override
   Widget build(BuildContext context)  {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.greenAccent,
+        backgroundColor: Colors.blueAccent,
         centerTitle: true,
         title: Text(
-          "Login Screen",
+          "Login",
           style: TextStyle(
             color: Colors.white
           ),
@@ -65,28 +66,39 @@ class LoginScreenState extends State<LoginScreen>{
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                RaisedButton(
-                  onPressed: _gSignin,
-                  child: Text(
-                    "Sign in with Google",
-                    style: TextStyle(
-                    color: Colors.white
+                ButtonTheme(
+                  minWidth: 200.0,
+                  height: 50.0,
+                  child: RaisedButton(
+                    onPressed: _gSignin,
+                    child: Text(
+                      "Sign in with Google",
+                      style: TextStyle(
+                      color: Colors.white
+                      ),
                     ),
+                    color: Colors.red,
+                    padding: EdgeInsets.all(10.0),
                   ),
-                  color: Colors.blueAccent,
-                  padding: EdgeInsets.all(10.0),
                 ),
-                RaisedButton(
-                  onPressed: _gSignout,
-                  child: Text(
-                    "Sign out of Google",
-                    style: TextStyle(
-                    color: Colors.white
-                    ),
-                  ),
-                  color: Colors.blueAccent,
-                  padding: EdgeInsets.all(10.0),
-                ),
+                // Container(
+                //   margin: EdgeInsets.only(top: 10.0),
+                //   child: ButtonTheme(
+                //     minWidth: 200.0,
+                //     height: 50.0,
+                //     child: RaisedButton(
+                //       onPressed: _gSignout,
+                //       child: Text(
+                //         "Sign out of Google",
+                //         style: TextStyle(
+                //           color: Colors.black87
+                //         ),
+                //       ),
+                //       color: Colors.red,
+                //       padding: EdgeInsets.all(10.0),
+                //     ),
+                //   ),
+                // ),
               ] 
             ),
           ),
@@ -95,10 +107,10 @@ class LoginScreenState extends State<LoginScreen>{
             ? Container(
               child: Center(
                 child: CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.lightBlue),
                 ),
               ),
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white,
             )
             : Container()
           )
@@ -128,21 +140,24 @@ class LoginScreenState extends State<LoginScreen>{
         await _preferences.setString('id', _currentUser.uid);
         await _preferences.setString('displayName', _currentUser.displayName);
         await _preferences.setString('photoUrl', _currentUser.photoUrl);
+        await _preferences.setString('email', _currentUser.email);
+        debugPrint(_preferences.getString('email'));
       }
       else {
         await _preferences.setString('id', documents[0]['id']);
         await _preferences.setString('photoUrl', documents[0]['photoUrl']);
         await _preferences.setString('displayName', documents[0]['displayName']);
         await _preferences.setString('about', documents[0]['about']);
+        await _preferences.setString('email', documents[0]['email']);
         debugPrint("Already on DB ${documents[0]['about']}");
       }
       Fluttertoast.showToast(msg: "Signed in as ${_preferences.getString('displayName')}");
       this.setState(()  {
         _isWaiting = false;
       });
-      Navigator.push(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: _preferences.getString('id')))
+        MaterialPageRoute(builder: (context) => HomeScreen(currentUserId: _preferences.getString('id'), googleSignIn: _googleSignIn))
       );
     }
     else  {
@@ -154,7 +169,7 @@ class LoginScreenState extends State<LoginScreen>{
     return firebaseUser;
   }
 
-  _gSignout() {
-    _googleSignIn.signOut();
-  }
+  // _gSignout() {
+  //   _googleSignIn.signOut();
+  // }
 }
