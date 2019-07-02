@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/widgets.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'group_settings.dart';
 
 class ChatScreen extends StatefulWidget {
   final String _peerId;
@@ -28,6 +30,7 @@ class ChatScreenState extends State<ChatScreen> {
   SharedPreferences _preferences;
   String _chatId;
   String _id;
+  String _img;
   TextEditingController _textEditingController = new TextEditingController();
 
   ChatScreenState ({
@@ -44,6 +47,7 @@ class ChatScreenState extends State<ChatScreen> {
   void _initialise() async {
     _preferences = await SharedPreferences.getInstance();
     _id = _preferences.getString('id');
+    _img = _preferences.getString('photoUrl');
     switch(_type)
     {
       case '2pChats':
@@ -64,7 +68,7 @@ class ChatScreenState extends State<ChatScreen> {
   void send() {
     final String msg = _textEditingController.text;
     final String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
-    if(msg.isNotEmpty){
+    if(msg.isNotEmpty)  {
       Firestore.instance.runTransaction((transaction) async{
         await transaction.set(
           Firestore.instance.collection(_type).document(_chatId).collection('messages').document(timeStamp),
@@ -72,7 +76,8 @@ class ChatScreenState extends State<ChatScreen> {
             'from': _id,
             'to': _peerId,
             'msg': msg,
-            'timeStamp': timeStamp
+            'timeStamp': timeStamp,
+            'fromImg': _img
           }
         );
       });
@@ -85,12 +90,24 @@ class ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.lightBlue,
+        actions: <Widget>[
+          (_type == 'groupChats')? IconButton(
+            color: Colors.white,
+            icon: Icon(Icons.settings),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => GroupSettings())
+              );
+            },
+          )
+          : Container()
+        ],
+        backgroundColor: Colors.blueAccent,
         title: Text(
           _peerName,
           style: TextStyle(
-            color: Colors.black87,
-            fontSize: 16.0,
+            color: Colors.white,
           ),
         ),
         centerTitle: true,
@@ -114,26 +131,38 @@ class ChatScreenState extends State<ChatScreen> {
                     itemBuilder: (context, i) {
                       DocumentSnapshot doc = snapshot.data.documents[i];
                       return Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: (doc['from'] == _id)? MainAxisAlignment.end: MainAxisAlignment.start,
                         children: <Widget>[
+                          (doc['from'] != _id)? CircleAvatar(
+                            radius: 15.0,
+                            backgroundImage: NetworkImage(doc['fromImg']),
+                          )
+                          : Container(),
                           Card(
-                            color: Colors.lightBlueAccent,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(20.0),),),
+                            color: (doc['from'] == _id)? Colors.lightBlueAccent: Colors.grey.shade500,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(20.0),)
+                            ),
                             child: Container(
                               child: Text(
                                 doc['msg'],
                                 style: TextStyle(
-                                  color: Colors.black87,
+                                  color: Colors.white,
                                 ),
                               ),
                               padding: EdgeInsets.all(10.0),
                               width: 250,
                               margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
                               decoration: BoxDecoration(
-                                color: Colors.lightBlueAccent,
+                                color: (doc['from'] == _id)? Colors.lightBlueAccent: Colors.grey.shade500,
                               ),
                             ),
+                          ),
+                          (doc['from'] == _id)? CircleAvatar(
+                            radius: 15.0,
+                            backgroundImage:  NetworkImage(doc['fromImg']),
                           )
+                          : Container(),
                         ],
                       );
                     },
@@ -176,10 +205,10 @@ class ChatScreenState extends State<ChatScreen> {
                     debugPrint('Pressed');
                     send();
                   },                 
-                  backgroundColor: Colors.lightBlue,
+                  backgroundColor: Colors.blueAccent,
                   child: Icon(
                     Icons.send,
-                    color: Colors.black87,
+                    color: Colors.white,
                   ),
                 )
               ],
