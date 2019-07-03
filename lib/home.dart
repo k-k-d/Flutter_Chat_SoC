@@ -1,12 +1,12 @@
 import 'package:chat_app_flutter/login.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'chat.dart';
 import 'group_create.dart';
 import 'user_settings.dart';
+import 'todo.dart';
 
 class HomeScreen extends StatefulWidget {
   final String _currentUserId;
@@ -59,7 +59,7 @@ class HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.white),
         actions: <Widget>[
-          IconButton(
+          (_selectedScreen == 0 || _selectedScreen == 1)? IconButton(
             color: Colors.white,
             icon: Icon(Icons.group_add),
             onPressed: () {
@@ -68,8 +68,10 @@ class HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => CreateGroup())
               );
+              setState(() {});
             },
-          ),
+          )
+          : Container(),
           IconButton(
             icon: Icon(Icons.settings),
             color: Colors.white,
@@ -79,6 +81,7 @@ class HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => SettingsScreen())
               );
+              setState(() {});
             },
           )
         ],
@@ -256,7 +259,8 @@ class HomeScreenState extends State<HomeScreen> {
           },
         ),
       )
-      : (_selectedScreen == 2)? Container(//Add ToDo List
+      : (_selectedScreen == 2)? Container(
+        child: TodoList(),
       )
       : Container()
     );
