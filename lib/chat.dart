@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
-// import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'group_settings.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_saver/image_saver.dart';
+import 'package:http/http.dart' as http;
+import 'package:photo_view/photo_view.dart';
+import 'dart:io';
 
 class ChatScreen extends StatefulWidget {
   final String _peerId;
@@ -64,7 +69,7 @@ class ChatScreenState extends State<ChatScreen> {
     setState(() {});
   }
   
-  void send() {
+  void _sendText() {
     final String msg = _textEditingController.text;
     final String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
     if(msg.isNotEmpty)  {
@@ -72,6 +77,7 @@ class ChatScreenState extends State<ChatScreen> {
         await transaction.set(
           Firestore.instance.collection(_type).document(_chatId).collection('messages').document(timeStamp),
           {
+            'type': 0,
             'from': _id,
             'to': _peerId,
             'msg': msg,
@@ -82,6 +88,34 @@ class ChatScreenState extends State<ChatScreen> {
       });
     }
     _textEditingController.clear();
+  }
+
+  void _sendImg(int i) async{
+    File pic;
+    if(i == 0)  {
+      pic = await ImagePicker.pickImage(source: ImageSource.gallery);
+    }
+    else if(i == 1) {
+      pic = await ImagePicker.pickImage(source: ImageSource.camera);
+    }
+    final String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
+    final StorageReference storageReference = FirebaseStorage.instance.ref().child('$_type/$_chatId/messages/$timeStamp.png');
+    final StorageUploadTask uploadTask = storageReference.putFile(pic);
+    final StorageTaskSnapshot downloadUrl = await uploadTask.onComplete;
+    final String msg = await downloadUrl.ref.getDownloadURL();
+    Firestore.instance.runTransaction((transaction) async {
+      await transaction.set(
+        Firestore.instance.collection(_type).document(_chatId).collection('messages').document(timeStamp),
+        {
+          'type': 1,
+          'from': _id,
+          'to': _peerId,
+          'msg': msg,
+          'timeStamp': timeStamp,
+          'fromImg': _img
+        }
+      );
+    });
   }
 
   @override
@@ -137,7 +171,7 @@ class ChatScreenState extends State<ChatScreen> {
                             backgroundImage: NetworkImage(doc['fromImg']),
                           )
                           : Container(),
-                          Card(
+                          (doc['type'] == 0)? Card(
                             color: (doc['from'] == _id)? Colors.lightBlueAccent: Colors.grey.shade500,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.all(Radius.circular(20.0),)
@@ -156,10 +190,59 @@ class ChatScreenState extends State<ChatScreen> {
                                 color: (doc['from'] == _id)? Colors.lightBlueAccent: Colors.grey.shade500,
                               ),
                             ),
-                          ),
+                          )
+                          : (doc['type'] == 1)? Card(
+                            color: (doc['from'] == _id)? Colors.lightBlueAccent: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(20.0),)
+                            ),
+                            child: Container(
+                              child: InkWell(
+                                child: FadeInImage(
+                                  fit: BoxFit.cover,
+                                  image: NetworkImage(doc['msg']),
+                                  placeholder: (AssetImage('assets/placeholder.png')),
+                                ),
+                                onTap: () async{
+                                  debugPrint("Tapped");
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context)  {
+                                      return Container(
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            valueColor: AlwaysStoppedAnimation<Color>(Colors.lightBlue),
+                                          ),
+                                        ),
+                                      );
+                                    })
+                                  );
+                                  var response = await http.get(doc['msg']);
+                                  File file = await ImageSaver.toFile(fileData: response.bodyBytes);
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(builder: (context)  {
+                                      return Container(
+                                        child: PhotoView(
+                                          imageProvider: NetworkImage(doc['msg']),
+                                        ),
+                                      );
+                                    })
+                                  );
+                                },
+                              ),
+                              padding: EdgeInsets.all(10.0),
+                              width: 250,
+                              margin: EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                              decoration: BoxDecoration(
+                                color: (doc['from'] == _id)? Colors.lightBlueAccent: Colors.white,
+                              ),
+                            ),
+                          )
+                          : Container(),
                           (doc['from'] == _id)? CircleAvatar(
                             radius: 15.0,
-                            backgroundImage:  NetworkImage(doc['fromImg']),
+                            backgroundImage:  NetworkImage(_img),
                           )
                           : Container(),
                         ],
@@ -185,6 +268,8 @@ class ChatScreenState extends State<ChatScreen> {
               children: <Widget>[
                 Flexible(
                   child: TextField(
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
                     style: TextStyle(
                       color: Colors.black87,
                     ),
@@ -199,10 +284,26 @@ class ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                 ),
+                IconButton(
+                  icon: Icon(Icons.photo),
+                  onPressed: () {
+                    debugPrint('Pressed');
+                    _sendImg(0);
+                  },
+                  iconSize: 30.0,
+                ),
+                IconButton(
+                  icon: Icon(Icons.camera_enhance),
+                  iconSize: 30.0,
+                  onPressed: () {
+                    debugPrint('Pressed');
+                    _sendImg(1);
+                  },
+                ),
                 FloatingActionButton(
                   onPressed: () {
                     debugPrint('Pressed');
-                    send();
+                    _sendText();
                   },                 
                   backgroundColor: Colors.blueAccent,
                   child: Icon(
@@ -211,8 +312,6 @@ class ChatScreenState extends State<ChatScreen> {
                   ),
                 )
               ],
-              // mainAxisAlignment: MainAxisAlignment.end,
-              // verticalDirection: VerticalDirection.down,
             ),
             margin: EdgeInsets.all(7.5),
           )

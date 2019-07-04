@@ -27,7 +27,8 @@ class SettingsScreenState extends State<SettingsScreen> {
   SharedPreferences _preferences;
 
   _uploadPhoto() async  {
-    final StorageReference storageReference = FirebaseStorage.instance.ref().child('users/$_currentUserId/profilePic.png');
+    final String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
+    final StorageReference storageReference = FirebaseStorage.instance.ref().child('users/$_currentUserId/profilePic$timeStamp.png');
     final StorageUploadTask uploadTask = storageReference.putFile(_photo);
     final StorageTaskSnapshot downloadUrl = await uploadTask.onComplete;
     photoUrl = await downloadUrl.ref.getDownloadURL();
