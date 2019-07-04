@@ -18,7 +18,7 @@ class ChatScreen extends StatefulWidget {
 
   ChatScreen  ({
     Key key, @required String peerId, @required String peerName, String peerImg, @required String type
-  }): _peerId = peerId, _peerName = peerName, _peerImg = peerImg, _type = type,super(key: key);
+  }): _peerId = peerId, _peerName = peerName, _peerImg = peerImg, _type = type, super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -130,7 +130,7 @@ class ChatScreenState extends State<ChatScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => GroupSettings())
+                MaterialPageRoute(builder: (context) => GroupSettings(chatId: _chatId))
               );
             },
           )
@@ -144,9 +144,9 @@ class ChatScreenState extends State<ChatScreen> {
           ),
         ),
         centerTitle: true,
-        leading: _peerImg != null? CircleAvatar(
-          backgroundImage: NetworkImage(_peerImg),
-        ): Container(),
+        // leading: _peerImg != null? CircleAvatar(
+        //   backgroundImage: NetworkImage(_peerImg),
+        // ): Container(),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,

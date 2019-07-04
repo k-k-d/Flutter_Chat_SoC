@@ -45,7 +45,8 @@ class CreateGroupState extends State<CreateGroup>  {
           'groupName':  groupName,
           'groupId':  groupId,
           'members': _selected,
-          'count':  _numberAdded
+          'count':  _numberAdded,
+          'groupImg': null
         }
       );
     });
@@ -118,6 +119,7 @@ class CreateGroupState extends State<CreateGroup>  {
                         }
                         if(_currentUserId != doc['id'])  {
                           return Card(
+                            elevation: 3.0,
                             color: Colors.lightBlue,
                             child: Container(
                               child: CheckboxListTile(

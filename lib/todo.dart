@@ -77,10 +77,11 @@ class TodoListState extends State<TodoList> {
 
   Widget _buildTodoItem(String todoText, int index) {
     return Card(
-      color: (index%2 == 0) ? Colors.blue : Colors.purpleAccent,
+      elevation: 3.0,
+      color: (index%2 == 0) ? Colors.blue : Colors.white,
       child: ListTile(
-        title: Text(todoText, style: TextStyle(color: Colors.white)),
-        leading: Icon(Icons.bookmark),
+        title: Text(todoText, style: TextStyle(color: (index%2 != 0) ? Colors.blue : Colors.white)),
+        leading: Icon(Icons.bookmark, color: (index%2 != 0) ? Colors.blue : Colors.white,),
         onLongPress: () => _promptRemoveTodoItem(index),
       )
     );

@@ -32,13 +32,13 @@ class SettingsScreenState extends State<SettingsScreen> {
     final StorageUploadTask uploadTask = storageReference.putFile(_photo);
     final StorageTaskSnapshot downloadUrl = await uploadTask.onComplete;
     photoUrl = await downloadUrl.ref.getDownloadURL();
-    Firestore.instance.collection('users').document(_currentUserId).updateData({'photoUrl': photoUrl});
+    await Firestore.instance.collection('users').document(_currentUserId).updateData({'photoUrl': photoUrl});
     _preferences.setString('photoUrl', photoUrl);
     setState(() {_photoUrl = photoUrl;});
   }
 
   _updateInfo() async {
-    Firestore.instance.collection('users').document(_currentUserId).updateData({'displayName': _displayName, 'about': _about, 'photoUrl': photoUrl});
+    await Firestore.instance.collection('users').document(_currentUserId).updateData({'displayName': _displayName, 'about': _about, 'photoUrl': photoUrl});
     _preferences.setString('displayName', _displayName);
     _preferences.setString('about', _about);
     _preferences.setString('photoUrl', photoUrl);
@@ -96,12 +96,13 @@ class SettingsScreenState extends State<SettingsScreen> {
         padding: EdgeInsets.all(40.0),
         child: Form(
           key: _key,
-          child: Column(
+          child: ListView(
             children: <Widget>[
               Container(
                 margin: EdgeInsets.only(bottom: 10.0), 
                 child: CircularProfileAvatar(
                   _photoUrl?? '',
+                  useOldImageOnUrlChange: true,
                   radius: 100.0,
                   backgroundColor: Colors.transparent,
                   elevation: 5.0,
@@ -115,15 +116,16 @@ class SettingsScreenState extends State<SettingsScreen> {
                           border: Border(top: BorderSide(color: Colors.black12)),
                         ),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             IconButton(
-                              iconSize:20.0,
+                              iconSize: 30.0,
                               icon: Icon(Icons.camera),
                               tooltip: 'Take a picture from camera',
                               onPressed : _camera,
                             ),
                             IconButton(
-                              iconSize:20.0,
+                              iconSize: 30.0,
                               icon: Icon(Icons.photo_album),
                               tooltip: 'Take a picture from gallery',
                               onPressed : _gallery,

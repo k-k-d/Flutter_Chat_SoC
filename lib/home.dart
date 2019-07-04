@@ -102,8 +102,10 @@ class HomeScreenState extends State<HomeScreen> {
               accountEmail: Text(_preferences.getString('email')??'Loading...'),
             ),
             Card(
+              elevation: 3.0,
               color: Colors.blueAccent,
               child: ListTile(
+                onTap: () {},
                 title: Text(
                   "Chats",
                   style: TextStyle(color: Colors.white)
@@ -112,6 +114,7 @@ class HomeScreenState extends State<HomeScreen> {
               )
             ),
             Card(
+              elevation: 3.0,
               child: ListTile(
                 title: Text("Group Chats"),
                 leading: Icon(Icons.group),
@@ -120,6 +123,7 @@ class HomeScreenState extends State<HomeScreen> {
               )
             ),
             Card(
+              elevation: 3.0,
               child: ListTile(
                 title: Text("Private Chats"),
                 leading: Icon(Icons.person),
@@ -128,18 +132,20 @@ class HomeScreenState extends State<HomeScreen> {
               )
             ),
             Card(
+              elevation: 3.0,
               color: Colors.blueAccent,
               child: ListTile(
                 title: Text(
                   "ToDo List",
                   style: TextStyle(color: Colors.white)
                 ),
-                leading: Icon(Icons.event),
+                leading: Icon(Icons.collections_bookmark),
                 selected: _selectedScreen == 2,
                 onTap: () {_onSelect(2);},
               )
             ),
             Card(
+              elevation: 3.0,
               color: Colors.red,
               child: ListTile(
                 onTap: () {
@@ -175,6 +181,7 @@ class HomeScreenState extends State<HomeScreen> {
                   DocumentSnapshot doc = snapshot.data.documents[i];
                   if(doc['members'].contains(_currentUserId)) {
                     return Card(
+                      elevation: 3.0,
                       color: Colors.lightBlue,
                       child: ListTile(
                         title: Text(
@@ -184,6 +191,10 @@ class HomeScreenState extends State<HomeScreen> {
                             // fontWeight: FontWeight.w600
                           ),
                         ),
+                        leading: (doc['groupImg'] != null)? CircleAvatar(
+                          backgroundImage: NetworkImage(doc['groupImg']),
+                        )
+                        : Container(height: 0.5, width: 0.5,),
                         onTap: () {
                           debugPrint("Tapped");
                           Navigator.push(
@@ -218,6 +229,7 @@ class HomeScreenState extends State<HomeScreen> {
                   debugPrint(doc.data.toString());
                   if(doc['id'] != _currentUserId) {
                     return Card(
+                      elevation: 3.0,
                       color: Colors.lightBlue,
                       child: ListTile(
                         title: Text(
@@ -236,7 +248,7 @@ class HomeScreenState extends State<HomeScreen> {
                         leading: (doc['photoUrl'] != null)? CircleAvatar(
                           backgroundImage: NetworkImage(doc['photoUrl']),
                         )
-                        : CircleAvatar(),
+                        : Container(height: 0.5, width: 0.5,),
                         subtitle: Text(
                           doc['about']??" ",
                           style: TextStyle(
