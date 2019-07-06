@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'add_member.dart';
 
 class GroupSettings extends StatefulWidget  {
   final String _chatId;
@@ -89,6 +90,7 @@ class GroupSettingsState extends State<GroupSettings> {
     _groupImg = await downloadUrl.ref.getDownloadURL();
     await Firestore.instance.collection('groupChats').document(_groupId.toString()).updateData({'groupImg': _groupImg});
     setState(() {});
+    Fluttertoast.showToast(msg: "Pic Updated");
   }
 
   _camera() async {
@@ -208,9 +210,6 @@ class GroupSettingsState extends State<GroupSettings> {
                 ],
               )
             ),
-            // Padding(
-            //   padding: EdgeInsets.symmetric(vertical: 5.0),
-            // ),
             Card(
               elevation: 3.0,
               child: Row(
@@ -231,6 +230,10 @@ class GroupSettingsState extends State<GroupSettings> {
                     color: Colors.blueGrey,
                     onPressed: () {
                       debugPrint('Pressed');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) =>MemberAddScreen(groupId: _groupId,))
+                      );
                     },
                   )
                 ]
@@ -246,6 +249,7 @@ class GroupSettingsState extends State<GroupSettings> {
                       itemCount: snapshot.data.documents.length,
                       itemBuilder: (context, i) {
                         DocumentSnapshot doc = snapshot.data.documents[i];
+                        debugPrint(doc['groups'].toString());
                         if(doc['groups'].contains(_groupId))  {
                           return Card(
                             elevation: 3.0,

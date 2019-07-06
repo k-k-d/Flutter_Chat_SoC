@@ -134,7 +134,8 @@ class LoginScreenState extends State<LoginScreen>{
       final QuerySnapshot result = await Firestore.instance.collection('users').where('id', isEqualTo: firebaseUser.uid).getDocuments();
       final List<DocumentSnapshot> documents = result.documents;
       if(documents.length == 0) {
-        Firestore.instance.collection('users').document(firebaseUser.uid).setData({'displayName': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid});
+        List<int> groups = [];
+        Firestore.instance.collection('users').document(firebaseUser.uid).setData({'displayName': firebaseUser.displayName, 'photoUrl': firebaseUser.photoUrl, 'id': firebaseUser.uid, 'email': firebaseUser.email, 'groups': groups});
         _currentUser = firebaseUser;
         await _preferences.setString('id', _currentUser.uid);
         await _preferences.setString('displayName', _currentUser.displayName);

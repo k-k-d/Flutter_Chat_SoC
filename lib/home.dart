@@ -24,6 +24,9 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   final String _currentUserId;
+  String _displayName;
+  String _photoUrl;
+  String _email;
   SharedPreferences _preferences;
   GoogleSignIn _googleSignIn;
   int _selectedScreen;
@@ -37,6 +40,9 @@ class HomeScreenState extends State<HomeScreen> {
 
   void initialise() async {
     _preferences = await SharedPreferences.getInstance();
+    _displayName = _preferences.getString('displayName');
+    _photoUrl = _preferences.getString('photoUrl');
+    _email = _preferences.getString('email');
     setState(() {});
   }
 
@@ -81,7 +87,11 @@ class HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(builder: (context) => SettingsScreen())
               );
-              setState(() {});
+              setState(() {
+                _displayName = _preferences.getString('displayName');
+                _photoUrl = _preferences.getString('photoUrl');
+                _email = _preferences.getString('email');
+              });
             },
           )
         ],
@@ -97,9 +107,9 @@ class HomeScreenState extends State<HomeScreen> {
         child: ListView(
           children: <Widget>[
             UserAccountsDrawerHeader(
-              currentAccountPicture: CircleAvatar(backgroundImage: NetworkImage(_preferences.getString('photoUrl'))),
-              accountName: Text(_preferences.getString('displayName')??'Loading...'),
-              accountEmail: Text(_preferences.getString('email')??'Loading...'),
+              currentAccountPicture: (_photoUrl != null)? CircleAvatar(backgroundImage: NetworkImage(_photoUrl)): CircleAvatar(),
+              accountName: Text(_displayName??'Loading...'),
+              accountEmail: Text(_email??'Loading...'),
             ),
             Card(
               elevation: 3.0,

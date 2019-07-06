@@ -35,13 +35,13 @@ class SettingsScreenState extends State<SettingsScreen> {
     await Firestore.instance.collection('users').document(_currentUserId).updateData({'photoUrl': photoUrl});
     _preferences.setString('photoUrl', photoUrl);
     setState(() {_photoUrl = photoUrl;});
+    Fluttertoast.showToast(msg: "Updated Pic");
   }
 
   _updateInfo() async {
-    await Firestore.instance.collection('users').document(_currentUserId).updateData({'displayName': _displayName, 'about': _about, 'photoUrl': photoUrl});
+    await Firestore.instance.collection('users').document(_currentUserId).updateData({'displayName': _displayName, 'about': _about});
     _preferences.setString('displayName', _displayName);
     _preferences.setString('about', _about);
-    _preferences.setString('photoUrl', photoUrl);
     Fluttertoast.showToast(msg: "Updated Info Successfully");
     Navigator.pop(context);
   }

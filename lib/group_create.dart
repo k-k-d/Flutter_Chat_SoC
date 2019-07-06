@@ -34,35 +34,41 @@ class CreateGroupState extends State<CreateGroup>  {
 
   _makeGroup()  async{
     final String groupName = _textEditingController.text.trim();
-    _selected.add(_currentUserId);
-    _numberAdded++;
-    final DocumentSnapshot doc = await Firestore.instance.collection('0').document('0').get();
-    final int groupId = doc['number_of_groups'];
-    Firestore.instance.runTransaction((transaction) async {
-      await transaction.set(
-        Firestore.instance.collection('groupChats').document(groupId.toString()),
-        {
-          'groupName':  groupName,
-          'groupId':  groupId,
-          'members': _selected,
-          'count':  _numberAdded,
-          'groupImg': null
+    if(_numberAdded > 0)  {
+      _selected.add(_currentUserId);
+      _numberAdded++;
+      final DocumentSnapshot doc = await Firestore.instance.collection('0').document('0').get();
+      final int groupId = doc['number_of_groups'];
+      debugPrint(_selected.toString());
+      Firestore.instance.runTransaction((transaction) async {
+        await transaction.set(
+          Firestore.instance.collection('groupChats').document(groupId.toString()),
+          {
+            'groupName':  groupName,
+            'groupId':  groupId,
+            'members': _selected,
+            'count':  _numberAdded,
+            'groupImg': null
+          }
+        );
+      });
+      await Firestore.instance.collection('0').document('0').updateData({'number_of_groups': groupId + 1});
+      for(var i in _selected) {
+        DocumentSnapshot d = await Firestore.instance.collection('users').document(i).get();
+        var groups = d['groups']??[];
+        List<dynamic> groupsNew = [];
+        for(var j in groups)  {
+          groupsNew.add(j);
         }
-      );
-    });
-    await Firestore.instance.collection('0').document('0').updateData({'number_of_groups': groupId + 1});
-    for(var i in _selected) {
-      DocumentSnapshot d = await Firestore.instance.collection('users').document(i).get();
-      var groups = d['groups']??[];
-      List<dynamic> groupsNew = [];
-      groupsNew.add(groupId);
-      for(var j in groups)  {
-        groupsNew.add(j);
+        groupsNew.add(groupId);
+        await Firestore.instance.collection('users').document(i).updateData({'groups': groupsNew});
       }
-      await Firestore.instance.collection('users').document(i).updateData({'groups': groupsNew});
+      Fluttertoast.showToast(msg: "Group Created");
+      Navigator.pop(context);
     }
-    Fluttertoast.showToast(msg: "Group Created");
-    Navigator.pop(context);
+    else  {
+      Fluttertoast.showToast(msg: "You have not selected Members");
+    }
   }
 
   @override
@@ -167,8 +173,8 @@ class CreateGroupState extends State<CreateGroup>  {
               child: FloatingActionButton(
                 child: Icon(Icons.add),
                 mini: true,
-                backgroundColor: Colors.lightBlue,
-                foregroundColor: Colors.black87,
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
                 onPressed: () {
                   final form = _key.currentState;
                   if(form.validate()) {
