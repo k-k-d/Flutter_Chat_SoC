@@ -1,3 +1,4 @@
+import 'package:chat_app_flutter/events.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
@@ -126,6 +127,17 @@ class ChatScreenState extends State<ChatScreen> {
         actions: <Widget>[
           (_type == 'groupChats')? IconButton(
             color: Colors.white,
+            icon: Icon(Icons.event_note),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => EventsScreen(groupId: int.parse(_chatId),))
+              );
+            },
+          )
+          : Container(),
+          (_type == 'groupChats')? IconButton(
+            color: Colors.white,
             icon: Icon(Icons.settings),
             onPressed: () {
               Navigator.push(
@@ -134,7 +146,7 @@ class ChatScreenState extends State<ChatScreen> {
               );
             },
           )
-          : Container()
+          : Container(),
         ],
         backgroundColor: Colors.blueAccent,
         title: Text(
@@ -144,9 +156,6 @@ class ChatScreenState extends State<ChatScreen> {
           ),
         ),
         centerTitle: true,
-        // leading: _peerImg != null? CircleAvatar(
-        //   backgroundImage: NetworkImage(_peerImg),
-        // ): Container(),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -154,7 +163,7 @@ class ChatScreenState extends State<ChatScreen> {
         children: <Widget>[
           Flexible(
             child: StreamBuilder(
-              stream: Firestore.instance.collection(_type).document(_chatId).collection('messages').orderBy('timeStamp', descending: true).limit(20).snapshots(),
+              stream: Firestore.instance.collection(_type).document(_chatId).collection('messages').orderBy('timeStamp', descending: true).limit(50).snapshots(),
               builder: (context, snapshot)  {
                 if(snapshot.hasData)  {
                   return ListView.builder(

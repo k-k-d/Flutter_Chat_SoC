@@ -80,24 +80,6 @@ class LoginScreenState extends State<LoginScreen>{
                     padding: EdgeInsets.all(10.0),
                   ),
                 ),
-                // Container(
-                //   margin: EdgeInsets.only(top: 10.0),
-                //   child: ButtonTheme(
-                //     minWidth: 200.0,
-                //     height: 50.0,
-                //     child: RaisedButton(
-                //       onPressed: _gSignout,
-                //       child: Text(
-                //         "Sign out of Google",
-                //         style: TextStyle(
-                //           color: Colors.black87
-                //         ),
-                //       ),
-                //       color: Colors.red,
-                //       padding: EdgeInsets.all(10.0),
-                //     ),
-                //   ),
-                // ),
               ] 
             ),
           ),
@@ -168,8 +150,4 @@ class LoginScreenState extends State<LoginScreen>{
     }
     return firebaseUser;
   }
-
-  // _gSignout() {
-  //   _googleSignIn.signOut();
-  // }
 }
