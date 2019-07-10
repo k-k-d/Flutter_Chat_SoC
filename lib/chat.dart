@@ -63,6 +63,7 @@ class ChatScreenState extends State<ChatScreen> {
           _chatId = '$_peerId-$_id';
         }
         debugPrint(_chatId);
+        // await Firestore.instance.collection(_type).document(_chatId).updateData({'lastActive': DateTime.now().millisecondsSinceEpoch});
         break;
       case 'groupChats':
         _chatId = _peerId;
@@ -74,6 +75,13 @@ class ChatScreenState extends State<ChatScreen> {
     final String msg = _textEditingController.text;
     final String timeStamp = DateTime.now().millisecondsSinceEpoch.toString();
     if(msg.isNotEmpty)  {
+      if(_type == 'groupChats') {
+        Firestore.instance.collection(_type).document(_chatId).updateData({'lastActive': int.parse(timeStamp)});
+      }
+      else  {
+        // Firestore.instance.collection('users').document(_peerId).updateData({_id: int.parse(timeStamp)});
+        // Firestore.instance.collection('users').document(_peerId).updateData({_id: int.parse(timeStamp)});
+      }
       Firestore.instance.runTransaction((transaction) async{
         await transaction.set(
           Firestore.instance.collection(_type).document(_chatId).collection('messages').document(timeStamp),

@@ -40,6 +40,7 @@ class CreateGroupState extends State<CreateGroup>  {
       final DocumentSnapshot doc = await Firestore.instance.collection('0').document('0').get();
       final int groupId = doc['number_of_groups'];
       debugPrint(_selected.toString());
+      Navigator.pop(context);
       Firestore.instance.runTransaction((transaction) async {
         await transaction.set(
           Firestore.instance.collection('groupChats').document(groupId.toString()),
@@ -48,7 +49,8 @@ class CreateGroupState extends State<CreateGroup>  {
             'groupId':  groupId,
             'members': _selected,
             'count':  _numberAdded,
-            'groupImg': null
+            'groupImg': null,
+            'lastActive': DateTime.now().millisecondsSinceEpoch
           }
         );
       });
@@ -64,7 +66,6 @@ class CreateGroupState extends State<CreateGroup>  {
         await Firestore.instance.collection('users').document(i).updateData({'groups': groupsNew});
       }
       Fluttertoast.showToast(msg: "Group Created");
-      Navigator.pop(context);
     }
     else  {
       Fluttertoast.showToast(msg: "You have not selected Members");

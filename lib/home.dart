@@ -29,12 +29,17 @@ class HomeScreenState extends State<HomeScreen> {
   String _email;
   SharedPreferences _preferences;
   GoogleSignIn _googleSignIn;
+  TextEditingController _controller;
   int _selectedScreen;
+  int _appBarMode;
+  var _appBarTitle;
 
   @override
   void initState()  {
     super.initState();
     _selectedScreen = 0;
+    _appBarMode = 0;
+    _appBarTitle = new Text('WingMate', style: TextStyle(color: Colors.white),);
     initialise();
   }
 
@@ -61,10 +66,35 @@ class HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context)  {
     return Scaffold(
       backgroundColor: Colors.white,
+      floatingActionButton: (_appBarMode == 0 && (_selectedScreen == 0 || _selectedScreen == 1))? FloatingActionButton(
+        backgroundColor: Colors.blueAccent,
+        child: Icon(Icons.search, color: Colors.white,),
+        onPressed: () {
+          setState(() {
+            _appBarMode = 1;
+            _appBarTitle = new TextField(
+              autofocus: true,
+              onChanged: (t) {
+                setState(() {
+                  _controller = TextEditingController(text: t);
+                });
+              },
+              controller: _controller,
+              style: TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                prefixIcon: Icon(Icons.search, color: Colors.white,),
+                hintText: 'Search...',
+                hintStyle: TextStyle(color: Colors.white, fontStyle: FontStyle.italic)
+              ),
+            );
+          });
+        },
+      )
+      :Container(),
       appBar: AppBar(
         centerTitle: true,
         iconTheme: IconThemeData(color: Colors.white),
-        actions: <Widget>[
+        actions: (_appBarMode == 0)? <Widget>[
           (_selectedScreen == 0 || _selectedScreen == 1)? IconButton(
             color: Colors.white,
             icon: Icon(Icons.group_add),
@@ -94,16 +124,24 @@ class HomeScreenState extends State<HomeScreen> {
               });
             },
           )
+        ]
+        : <Widget>[
+          IconButton(
+            icon: Icon(Icons.cancel),
+            color: Colors.white,
+            onPressed: () {
+              setState(() {
+                _controller.clear();
+                _appBarMode = 0;
+                _appBarTitle = new Text('WingMate', style: TextStyle(color: Colors.white),);
+              });
+            },
+          )
         ],
         backgroundColor: Colors.blueAccent,
-        title: Text(
-          'WingMate',
-          style: TextStyle(
-            color: Colors.white,
-          )
-        ),
+        title: _appBarTitle
       ),
-      drawer: Drawer(
+      drawer: (_appBarMode == 0)? Drawer(
         child: ListView(
           children: <Widget>[
             UserAccountsDrawerHeader(
@@ -178,10 +216,11 @@ class HomeScreenState extends State<HomeScreen> {
             ),
           ]
         ),
-      ),
+      )
+      : null,
       body: (_selectedScreen == 0)? Container(
         child: StreamBuilder(
-          stream: Firestore.instance.collection('groupChats').snapshots(),
+          stream: Firestore.instance.collection('groupChats').orderBy('lastActive', descending: true).snapshots(),
           builder: (context, snapshot)  {
             if(snapshot.hasData)  {
               return ListView.builder(
@@ -189,7 +228,7 @@ class HomeScreenState extends State<HomeScreen> {
                 itemCount: snapshot.data.documents.length,
                 itemBuilder: (context, i) {
                   DocumentSnapshot doc = snapshot.data.documents[i];
-                  if(doc['members'].contains(_currentUserId)) {
+                  if(doc['members'].contains(_currentUserId) && (_controller == null || _controller.text.trim() == null || _controller.text.trim() == '' || doc['groupName'].toUpperCase().contains(_controller.text.toUpperCase().trim()))) {
                     return Card(
                       elevation: 3.0,
                       color: Colors.lightBlue,
@@ -207,6 +246,11 @@ class HomeScreenState extends State<HomeScreen> {
                         : Container(height: 0.5, width: 0.5,),
                         onTap: () {
                           debugPrint("Tapped");
+                          setState(() {
+                            _controller.clear();
+                            _appBarMode = 0;
+                            _appBarTitle = new Text('WingMate', style: TextStyle(color: Colors.white),);
+                          });
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => ChatScreen(peerId: doc['groupId'].toString(), peerName: doc['groupName'], type: 'groupChats'))
@@ -237,7 +281,7 @@ class HomeScreenState extends State<HomeScreen> {
                 itemBuilder: (context, i) {
                   DocumentSnapshot doc = snapshot.data.documents[i];
                   debugPrint(doc.data.toString());
-                  if(doc['id'] != _currentUserId) {
+                  if(doc['id'] != _currentUserId && (_controller == null || _controller.text.trim() == null || _controller.text.trim() == '' || doc['displayName'].toUpperCase().contains(_controller.text.toUpperCase().trim()))) {
                     return Card(
                       elevation: 3.0,
                       color: Colors.lightBlue,
@@ -250,6 +294,11 @@ class HomeScreenState extends State<HomeScreen> {
                         ),
                         onTap: () {
                           debugPrint("Tapped");
+                          setState(() {
+                            _controller.clear();
+                            _appBarMode = 0;
+                            _appBarTitle = new Text('WingMate', style: TextStyle(color: Colors.white),);
+                          });
                           Navigator.push(
                             context,
                             MaterialPageRoute(builder: (context) => ChatScreen(peerId: doc['id'], peerName: doc['displayName'], peerImg: doc['photoUrl'], type: '2pChats'))
