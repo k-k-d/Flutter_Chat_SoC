@@ -48,7 +48,7 @@ class LoginScreenState extends State<LoginScreen>{
   @override
   Widget build(BuildContext context)  {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromRGBO(226, 249, 248, 1.0),
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
@@ -65,6 +65,17 @@ class LoginScreenState extends State<LoginScreen>{
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
+                Container(
+                  child: Text(
+                    "WingMate",
+                    style: TextStyle(
+                      fontSize: 35.0,
+                    )  
+                  ),
+                ),
+                Container(
+                  child: Image.asset('assets/logo.jpeg'),
+                ),
                 ButtonTheme(
                   minWidth: 200.0,
                   height: 50.0,
