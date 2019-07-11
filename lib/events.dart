@@ -60,7 +60,7 @@ class EventsScreenState extends State<EventsScreen> {
                           style: TextStyle(color: Colors.white),
                         ),
                         subtitle: Text(
-                          "At ${doc['where']}\nOn ${days[doc['when'].toDate().weekday]}, ${doc['when'].toDate().day} ${months[doc['when'].toDate().month]} At ${doc['when'].toDate().hour}: ${doc['when'].toDate().minute}",
+                          "At ${doc['where']}\nOn ${days[doc['when'].toDate().weekday - 1]}, ${doc['when'].toDate().day} ${months[doc['when'].toDate().month - 1]} At ${doc['when'].toDate().hour}: ${doc['when'].toDate().minute}",
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
