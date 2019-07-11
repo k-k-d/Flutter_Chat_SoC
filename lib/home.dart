@@ -37,6 +37,7 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   void initState()  {
     super.initState();
+    _controller = new TextEditingController();
     _selectedScreen = 0;
     _appBarMode = 0;
     _appBarTitle = new Text('WingMate', style: TextStyle(color: Colors.white),);
